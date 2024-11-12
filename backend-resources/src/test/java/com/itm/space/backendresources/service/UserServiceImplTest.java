@@ -6,6 +6,7 @@ import com.itm.space.backendresources.api.request.UserRequest;
 import com.itm.space.backendresources.api.response.UserResponse;
 import com.itm.space.backendresources.mapper.UserMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
@@ -54,21 +55,17 @@ class UserServiceImplTest extends BaseIntegrationTest {
 
     @Test
     @WithMockUser(roles = "MODERATOR")
-    public void CreateUserTest() throws Exception {
-        UserRequest userRequest = new UserRequest(
-                "username", "email@example.com", "password", "FirstName", "LastName");
-        mvc.perform(requestWithContent(post("/api/users"), userRequest))
-                .andExpect(status().isOk());
-        userId = keycloak.realm("ITM").users().search(userRequest.getUsername()).get(0).getId(); // СОХРАНЯЕМ ID УСПЕШНО СОЗДАННОГО ЮЗЕРА
-    }
-
-
-    @Test
-    @WithMockUser(roles = "MODERATOR")
     void getUserById()throws Exception{
-            createUser();
+             createUser();
             mvc.perform(get("/api/users/"+userId))
                 .andExpect(status().isOk());
+    }
+
+    @BeforeEach
+    public void upDown(){
+        if (userId != null){
+            keycloak.realm("ITM").users().get(userId).remove();
+        }
     }
 
     @AfterEach
